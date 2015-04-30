@@ -2,6 +2,9 @@
 
 # TODO (phlco) remove Hub dependency and use github gem/api directly...
 
+# require lib/*/**
+require 'submit_hw/version'
+
 # require dependencies
 require "octokit"
 require "colorize"
@@ -25,6 +28,10 @@ if ["-h","--help"].include? ARGV[0]
        "Pull Request for homework."
   puts "If you are having trouble, run in debug mode:"
   puts "$ submit_hw --debug"
+  exit(true)
+end
+if ["-v","--version"].include? ARGV[0]
+  puts SubmitHw::VERSION
   exit(true)
 end
 ARGV.clear # clean out arguments from $stdin so they don't get `gets`-ed below
@@ -177,17 +184,18 @@ submitted_at = Time.now.strftime("%H:%m")
 submitted_on = Time.now.strftime('%Y-%m-%d')
 message      = "HW for #{human_name}: #{submitted_on} at #{submitted_at}" + \
                "\n\n#{data.to_json}"
-debug "message: #{message.split("\n").first}"
 
 # Push to their fork.
 puts "Pushing your work to your fork...\n"
 push_msg = `git push origin master 2>&1`
-debug "push_message: #{push_msg}" #|| puts # spacin' it out bru
+debug "push output: #{push_msg}" #|| puts # spacin' it out bru
 
 # Submit PR to class repo in their GH named branch
 puts "Submitting a pull request...\n"
+debug "pr branch: #{branch}"
+debug "pr message: #{message.split("\n").first}"
 submission_msg = `hub pull-request -m '#{message}' -b '#{branch}' 2>&1`
-debug "pr_message: #{submission_msg}"
+debug "pr output: #{submission_msg}"
 
 # Check the submission message to ensure there were no errors
 if submission_msg.include? "pull request already exists"
