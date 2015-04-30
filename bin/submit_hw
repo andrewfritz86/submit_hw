@@ -74,13 +74,13 @@ end
 
 # Ensure their gitconfig has a "name" entry with their GH username, and if not,
 # add it.
-output = `git config --get user.name`
-debug "user.name: #{output}"
+output = `git config --get user.githubname`
+debug "user.githubname: #{output}"
 if output.empty?
   puts "Please enter your Github username (it is case sensitive)."
   github_username = gets.chomp
-  output = `git config --add user.name '#{github_username}'`
-  debug "new user.name: #{output}"
+  output = `git config --add user.githubname '#{github_username}'`
+  debug "new user.githubname: #{output}"
 end
 
 # Check to see if they have a hub config file, which stores an auth token that
@@ -178,7 +178,7 @@ end
 
 # Get the necessary data to form a commit message.
 human_name   = `git config --get user.humanname`.chomp
-github_name  = `git config --get user.github`.chomp.downcase
+github_name  = `git config --get user.githubname`.chomp.downcase
 branch       = "#{upstream}:#{github_name}"
 submitted_at = Time.now.strftime("%H:%m")
 submitted_on = Time.now.strftime('%Y-%m-%d')
