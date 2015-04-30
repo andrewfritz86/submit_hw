@@ -199,14 +199,18 @@ debug "pr output: #{submission_msg}"
 
 # Check the submission message to ensure there were no errors
 if submission_msg.include? "pull request already exists"
-  puts ("You already have an outstanding pull request," + \
-        "\nand now it's been updated! Have a great day.").green
+  puts ("\nYou already have an outstanding pull request," + \
+    "\nand now it's been updated! Have a great day.").green
 elsif submission_msg.include? "pull request: Unprocessable Entity (HTTP 422)"
-  puts ("We may not have an upstream branch for you yet. " + \
-       "Contact your Instructors!").red
+  puts ("\nWe may not have an upstream branch for you yet. " + \
+    "Contact your Instructors!").red
+elsif submission_msg.include? 'github.com///github.com'
+  print ("\nYou are using HTTPS to connect to upstream, but submit_hw" + \
+    "\nrequires you to use SSH. Update to SSH using this guide:").red + \
+    "\n\nhttps://help.github.com/articles/changing-a-remote-s-url\n\n"
 elsif submission_msg.include? "No commits between"
   # NOTE: (phlco) we'll ignore this for now bc we probably won't get this error.
-  puts "You haven't commited any changes.".red
+  puts "\nYou haven't commited any changes.".red
 else
-  puts "Thanks for submitting your homework.".green
+  puts "\nThanks for submitting your homework.".green
 end
