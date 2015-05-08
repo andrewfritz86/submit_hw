@@ -2,6 +2,9 @@
 
 # TODO (phlco) remove Hub dependency and use github gem/api directly...
 
+# require lib/*/**
+require 'submit_hw/version'
+
 # require dependencies
 require "octokit"
 require "colorize"
@@ -25,6 +28,10 @@ if ["-h","--help"].include? ARGV[0]
        "Pull Request for homework."
   puts "If you are having trouble, run in debug mode:"
   puts "$ submit_hw --debug"
+  exit(true)
+end
+if ["-v","--version"].include? ARGV[0]
+  puts SubmitHw::VERSION
   exit(true)
 end
 ARGV.clear # clean out arguments from $stdin so they don't get `gets`-ed below
@@ -61,19 +68,19 @@ debug "user.humanname: #{output}"
 if output.empty?
   print "Please enter your full, human name: "
   human_name = gets.chomp
-  output = `git config --add user.humanname '#{human_name}'`
+  output     = `git config --add user.humanname '#{human_name}'`
   debug "new user.humanname: #{output}"
 end
 
 # Ensure their gitconfig has a "name" entry with their GH username, and if not,
 # add it.
-output = `git config --get user.name`
-debug "user.name: #{output}"
+output = `git config --get user.githubname`
+debug "user.githubname: #{output}"
 if output.empty?
   puts "Please enter your Github username (it is case sensitive)."
   github_username = gets.chomp
-  output = `git config --add user.name '#{github_username}'`
-  debug "new user.name: #{output}"
+  output = `git config --add user.githubname '#{github_username}'`
+  debug "new user.githubname: #{output}"
 end
 
 # Check to see if they have a hub config file, which stores an auth token that
@@ -171,13 +178,12 @@ end
 
 # Get the necessary data to form a commit message.
 human_name   = `git config --get user.humanname`.chomp
-github_name  = `git config --get user.github`.chomp.downcase
+github_name  = `git config --get user.githubname`.chomp.downcase
 branch       = "#{upstream}:#{github_name}"
 submitted_at = Time.now.strftime("%H:%m")
 submitted_on = Time.now.strftime('%Y-%m-%d')
 message      = "HW for #{human_name}: #{submitted_on} at #{submitted_at}" + \
                "\n\n#{data.to_json}"
-debug "message: #{message.split("\n").first}"
 
 # Push to their fork.
 puts "Pushing your work to your fork...\n"
@@ -193,14 +199,18 @@ debug "pr_message: #{submission_msg}"
 
 # Check the submission message to ensure there were no errors
 if submission_msg.include? "pull request already exists"
-  puts ("You already have an outstanding pull request," + \
-        "\nand now it's been updated! Have a great day.").green
+  puts ("\nYou already have an outstanding pull request," + \
+    "\nand now it's been updated! Have a great day.").green
 elsif submission_msg.include? "pull request: Unprocessable Entity (HTTP 422)"
-  puts ("We may not have an upstream branch for you yet. " + \
-       "Contact your Instructors!").red
+  puts ("\nWe may not have an upstream branch for you yet. " + \
+    "Contact your Instructors!").red
+elsif submission_msg.include? 'github.com///github.com'
+  print ("\nYou are using HTTPS to connect to upstream, but submit_hw" + \
+    "\nrequires you to use SSH. Update to SSH using this guide:").red + \
+    "\n\nhttps://help.github.com/articles/changing-a-remote-s-url\n\n"
 elsif submission_msg.include? "No commits between"
   # NOTE: (phlco) we'll ignore this for now bc we probably won't get this error.
-  puts "You haven't commited any changes.".red
+  puts "\nYou haven't commited any changes.".red
 else
-  puts "Thanks for submitting your homework.".green
+  puts "\nThanks for submitting your homework.".green
 end
