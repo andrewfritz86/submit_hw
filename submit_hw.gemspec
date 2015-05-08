@@ -6,7 +6,7 @@ require "submit_hw/version"
 Gem::Specification.new do |s|
   s.name        = "submit_hw"
   s.version     = SubmitHw::VERSION
-  s.date        = "2015-04-30"
+  s.date        = "2015-05-07"
   s.summary     = "A script to submit homework for GA's WDI."
   s.description = ""
   s.authors     = ["Jeffrey Konowitch", "PJ Hughes", "Phillip Lamplugh", "Travis Vander Hoop", "Neel Patel", "Dennis Liaw"]
